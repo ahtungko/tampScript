@@ -10,9 +10,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-          fetch-depth: 0
 
       - name: Set up Git user
         run: |
@@ -21,16 +18,20 @@ jobs:
 
       - name: Update JS file with current date and time
         run: |
-          sed -i "s/Last update : .*/Last update : $(date)/" youtube.user-auto.js
+          sed -i "s/Last update : .*/Last update : $(date)/" youtube.user-auto.js || { echo "sed command failed"; exit 1; }
+
+      - name: Add changes
+        run: |
+          git add . || { echo "git add failed"; exit 1; }
 
       - name: Commit changes
         run: |
-          git add .
-          git commit -m "Daily update: $(date)"
+          git commit -m "Daily update: $(date)" || { echo "git commit failed"; exit 1; }
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          force: true # Use with caution!  Consider removing this.
+          branch: main # Specify the target branch directly
+          # force: true  <- Remove this unless absolutely necessary
+        if: success() # Only push if previous steps succeeded
