@@ -2,7 +2,7 @@ name: Daily Commit Manual
 
 on:
   schedule:
-    - cron: '0 12 * * *' # Runs every day at midnight UTC
+    - cron: '0 12 * * *' 
   workflow_dispatch:
 
 jobs:
@@ -47,6 +47,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.TOKEN_WRITE }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
         if: success()
