@@ -1,4 +1,4 @@
-name: Daily Commit Manual
+name: Daily Commit
 
 on:
   schedule:
@@ -47,6 +47,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.TOKEN_WRITE }}
           branch: main
         if: success()
