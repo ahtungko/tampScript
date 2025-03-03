@@ -9,32 +9,42 @@ jobs:
   commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Git user
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "github-actions[bot]"
 
+      - name: Create file if it doesn't exist
+        uses: actions/github-script@v6
+        if: "!contains(github.event_name, 'push')"
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('youtube.user-auto.js')) {
+              fs.writeFileSync('youtube.user-auto.js', `// Last update : ${new Date().toISOString()}\n`);
+              console.log('File youtube.user-auto.js created.');
+            }
+
       - name: Update JS file with current date and time
         run: |
-          sed -i "s/Last update : .*/Last update : $(date)/" youtube.user-auto.js || { echo "sed command failed"; exit 1; }
+          sed -i "s/Last update : .*/Last update : $(date)/" youtube.user-auto.js || { echo "sed command failed" >&2; exit 1; }
 
       - name: Add changes
-        run: |
-          git add . || { echo "git add failed"; exit 1; }
+        run: git add . || { echo "git add failed" >&2; exit 1; }
 
       - name: Commit changes
         run: |
-          git commit -m "Daily update: $(date)" || { echo "git commit failed"; exit 1; }
+          if ! git diff-index --quiet HEAD --; then
+            git commit -m "Daily update: $(date)" || { echo "git commit failed" >&2; exit 1; }
+          else
+            echo "No changes to commit." >&2
+          fi
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main # Specify the target branch directly
-          # force: true # Use with extreme caution!  Preferably avoid.
-        if: success() # Only push if previous steps were successful
-
-
+          branch: main
+        if: success()
