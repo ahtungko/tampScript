@@ -43,8 +43,8 @@ jobs:
           fi
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ahtungko/github-push-action@master
         with:
-          github_token: ${{ secrets.TOKEN_WRITE }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
         if: success()
